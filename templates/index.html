@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Motorcycle Helmet - Project</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.5/css/boxicons.min.css" rel="stylesheet"/>
+
+    <!-- Javascript -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <style>
+      * {
+        font-family: "Roboto", serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        background-color: #fff;
+      }
+
+      .side-navbar {
+        width: 250px;
+        height: 100%;
+        position: fixed;
+        margin-left: -300px;
+        background-color: #100901;
+        transition: 0.5s;
+      }
+
+      .nav-link:active,
+      .nav-link:focus,
+      .nav-link:hover {
+        background-color: #ffffff26;
+      }
+      .nav-link a, .nav-link i{
+        color: #fff;
+        text-decoration: none;
+        cursor: default;
+      }
+
+      .my-container {
+        transition: 0.4s;
+      }
+
+      .active-nav {
+        margin-left: 0;
+      }
+
+      /* for main section */
+      .active-cont {
+        margin-left: 250px;
+      }
+
+      #menu-btn {
+        background-color: #100901;
+        color: #fff;
+        margin-left: -62px;
+      }
+
+      .my-container input {
+        border-radius: 2rem;
+        padding: 2px 20px;
+      }
+
+      .contact-ico {
+        background: #00000000;
+        border: 0px solid #00000000;
+        border-radius: 20px;
+        padding: 6px;
+        transition: 0.2s;
+      }
+      .contact-ico:hover {
+        background: #37415123;
+        border: 0px solid #00000000;
+        border-radius: 20px;
+        padding: 6px;
+      }
+      .steam{
+        position: relative;
+        width: 960px;
+        height: 540px;
+        background: #000000;
+      }
+      .steam h3 {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: -50px 0 0 -50px;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="side-navbar active-nav d-flex justify-content-between flex-wrap flex-column"
+      id="sidebar">
+      <ul class="nav flex-column text-white w-100">
+        <a href="#" class="nav-link h3 text-white my-2">
+          Motorcycle Helmet <br>Detection</br>
+        </a>
+        <li href="#" class="nav-link">
+          <i class="bx bx-desktop"></i>
+          <a class="mx-2">Monitor</a>
+        </li>
+        <li href="#" class="nav-link">
+          <i class="bx bxs-report"></i>
+          <a class="mx-2">Reports</a>
+        </li>
+        <li href="#" class="nav-link">
+          <i class="bx bx-cog"></i>
+          <a class="mx-2">Setting</a>
+        </li>
+      </ul>
+
+    </div>
+
+    <!-- Main Wrapper -->
+    <div class="p-1 my-container active-cont">
+      <!-- Top Nav -->
+
+      <!--End Top Nav -->
+      <h3 class="text-dark p-3">Monitor</h3>
+      <div class="card-body d-flex justify-content-center">
+        <div class="steam" id="video-frame">
+          <h3 class="conn d-none" id="conn-alert">No Connected</h3>"
+          <img
+            id="steam"
+            src="http://127.0.0.1:8001/api/steam"
+            width="960px"
+          />
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // var menu_btn = document.querySelector("#menu-btn");
+      // var sidebar = document.querySelector("#sidebar");
+      // var container = document.querySelector(".my-container");
+      // menu_btn.addEventListener("click", () => {
+      //   sidebar.classList.toggle("active-nav");
+      //   container.classList.toggle("active-cont");
+      // });
+
+      function A() {
+        var video = document.getElementById("steam")
+        var text = document.getElementById("conn-alert")
+        var video_frame = document.getElementById("video-frame")
+        console.log("A")
+        video.onerror = function() {
+          console.log('Video is not alive.');
+          text.setAttribute("class", "conn")
+          video.setAttribute("class", "img-fluid d-none")
+        };
+
+        video.onplay = function() {
+          console.log('Connected.')
+          text.setAttribute("class", "conn d-none")
+        }
+      }
+      A() 
+    </script>
+  </body>
+</html>
