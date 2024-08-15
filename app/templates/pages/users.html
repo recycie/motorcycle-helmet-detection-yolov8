@@ -1,0 +1,353 @@
+<div class="mb-4 rounded bg-gray-50">
+    <div class="bg-white rounded-lg shadow p-4 md:p-6">
+        <div class="flex justify-end my-4">
+            <button id="register" type="submit"
+                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Add
+                Account</button>
+        </div>
+
+        <div class="flex flex-column sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4">
+            <div>
+                <label for="selectentity" class="mb-2 text-sm font-medium text-gray-900">Show</label>
+                <select id="selectentity"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+
+            <label for="table-search" class="sr-only">Search</label>
+            <div class="relative">
+                <div
+                    class="absolute inset-y-0 left-0 rtl:inset-r-0 rtl:right-0 flex items-center ps-3 pointer-events-none">
+                    <svg class="w-5 h-5 text-gray-500" aria-hidden="true" fill="currentColor"
+                        viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <input type="text" id="table-search"
+                    class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-full bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Search for items">
+            </div>
+        </div>
+
+        <table id="users-table" class="w-full text-left text-sm rtl:text-right text-gray-700">
+            <thead class="uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="w-1/12 px-6 py-3">ID</th>
+                    <th scope="col" class="w-1/4 px-6 py-3">Username</th>
+                    <th scope="col" class="w-1/12 px-6 py-3">Role</th>
+                    <th scope="col" class="w-1/12 px-6 py-3">Account Status</th>
+                    <th scope="col" class="w-1/6 px-6 py-3">Action</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                {% for user in userlist %}
+                <tr>
+                    <td class="px-6 py-2">
+                        {{ user.id }}
+                    </td>
+                    <td class="px-6 py-2">
+                        <div class="text-left text-base font-semibold">{{ user.username }}</div>
+                    </td>
+                    <td class="px-6 py-2">
+                        {{ user.role }}
+                    </td>
+                    <td class="px-6 py-2">
+                        {{ user.accountstatus.value|safe }}
+                    </td>
+                    <td class="px-6 py-2 edit">
+                        <button data-user-id="{{user.id}}"
+                            class="py-1.5 px-4 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">EDIT</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#users-table').on('click', '.edit button', function (e) {
+            e.preventDefault()
+            const userId = parseInt($(this).data('user-id'))
+
+            showSpinner()
+            // Fetch user data for the given ID
+            $.ajax({
+                url: `{{ url_for('get_user') }}`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ user_id: userId }),
+                success: function (data) {
+                    hideSpinner()
+                    Swal.fire({
+                        html: `
+                            <div class="flex flex-col justify-center">
+                                <p class="mb-1 text-lg font-semibold text-gray-900">Edit Account</p>
+                            </div>
+                            <div id="edit-form" class="mt-8 space-y-6">
+                                <div>
+                                    <label for="edit-username" class="text-left block mb-2 text-sm font-medium text-gray-900">Username</label>
+                                    <input type="text" id="edit-username" value="${data.username}"
+                                        class="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                        disabled />
+                                </div>
+                                <div class="grid grid-cols-2 space-x-6">
+                                    <div>
+                                        <label for="edit-password" class="text-left block mb-2 text-sm font-medium text-gray-900">Password</label>
+                                        <input type="password" id="edit-password" placeholder="••••••••"
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+                                    </div>
+                                    <div>
+                                        <label for="edit-confirmpassword" class="text-left block mb-2 text-sm font-medium text-gray-900">Confirm Password</label>
+                                        <input type="password" id="edit-confirmpassword" placeholder="••••••••"
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="edit-role" class="text-left block mb-2 text-sm font-medium text-gray-900">Roles</label>
+                                    <select id="edit-role" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                        <option value="user" ${data.role === 'user' ? 'selected' : ''}>User</option>
+                                        <option value="admin" ${data.role === 'admin' ? 'selected' : ''}>Admin</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="edit-status" class="text-left block mb-2 text-sm font-medium text-gray-900">Account Status</label>
+                                    <select id="edit-status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                        <option value="active" ${data.status === 'active' ? 'selected' : ''}>Active</option>
+                                        <option value="closed" ${data.status === 'closed' ? 'selected' : ''}>Closed</option>
+                                        <option value="locked" ${data.status === 'locked' ? 'selected' : ''}>Locked</option>
+                                        <option value="suspended" ${data.status === 'suspended' ? 'selected' : ''}>Suspended</option>
+                                    </select>
+                                </div>
+                            </div>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: 'Update',
+                        customClass: {
+                            confirmButton: 'px-5 py-2.5 text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-center',
+                            cancelButton: 'px-5 py-2.5 text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-lg text-center',
+                        },
+                        preConfirm: () => {
+                            const password = $('#edit-password').val()
+                            const confirmPassword = $('#edit-confirmpassword').val()
+                            const role = $('#edit-role').val()
+                            const status = $('#edit-status').val()
+
+                            if (!role || !status) {
+                                Swal.showValidationMessage('Please fill out all required fields')
+                                return false
+                            }
+
+                            if (password && password !== confirmPassword) {
+                                Swal.showValidationMessage('Passwords do not match')
+                                return false
+                            }
+
+                            return { userId, password, role, status }
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const { userId, password, role, status } = result.value
+                            updateUser(userId, password, role, status)
+                        }
+                    })
+                },
+                error: function (xhr, status, error) {
+                    hideSpinner()
+                    let errorMsg = 'An error occurred while update'
+                    if (xhr.responseJSON && xhr.responseJSON.msg) {
+                        errorMsg = xhr.responseJSON.msg
+                    }
+                    Toast.fire({
+                        icon: xhr.responseJSON.status,
+                        title: errorMsg
+                    })
+                }
+            })
+        })
+
+        function updateUser(userId, password, role, status) {
+            showSpinner()
+            $.ajax({
+                url: `{{ url_for("update_user") }}`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ userId, password, role, status }),
+                success: function (data) {
+                    Toast.fire({
+                        icon: data.status,
+                        title: data.msg
+                    }).then(() => {
+                        location.reload()
+                    })
+                },
+                error: function (xhr, status, error) {
+                    hideSpinner()
+                    let errorMsg = 'An error occurred while update'
+                    if (xhr.responseJSON && xhr.responseJSON.msg) {
+                        errorMsg = xhr.responseJSON.msg
+                    }
+                    Toast.fire({
+                        icon: xhr.responseJSON.status,
+                        title: errorMsg
+                    })
+                }
+            })
+        }
+
+        $('#register').on('click', function (e) {
+            e.preventDefault()
+            Swal.fire({
+                html: `
+                    <div class="flex flex-col justify-center">
+                        <p class="mb-1 text-lg font-semibold text-gray-900">Add Account</p>
+                    </div>
+                    <div id="register-form" class="mt-8 space-y-6">
+                        <div>
+                            <label for="username" class="text-left block mb-2 text-sm font-medium text-gray-900">Username</label>
+                            <input type="text" name="username" id="username"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                placeholder="user01" required />
+                        </div>
+                        <div class="grid grid-cols-2 space-x-6">
+                            <div>
+                                <label for="password" class="text-left block mb-2 text-sm font-medium text-gray-900">Password</label>
+                                <input type="password" name="password" id="password" placeholder="••••••••"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                    required />
+                            </div>
+                            <div>
+                                <label for="confirmpassword" class="text-left block mb-2 text-sm font-medium text-gray-900">Confirm Password</label>
+                                <input type="password" name="confirmpassword" id="confirmpassword" placeholder="••••••••"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                    required />
+                            </div>
+                        </div>
+                        <div>
+                            <label for="role" class="text-left block mb-2 text-sm font-medium text-gray-900">Roles</label>
+                            <select id="role" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                <option value="user" selected>User</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Add User',
+                customClass: {
+                    confirmButton: 'px-5 py-2.5 text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-center',
+                    cancelButton: 'px-5 py-2.5 text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-lg text-center',
+                },
+                preConfirm: () => {
+                    const username = $('#username').val()
+                    const password = $('#password').val()
+                    const confirmPassword = $('#confirmpassword').val()
+                    const role = $('#role').val()
+
+                    if (!username || !password || !confirmPassword || !role) {
+                        Swal.showValidationMessage('Please fill out all fields')
+                        return false
+                    }
+
+                    if (password !== confirmPassword) {
+                        Swal.showValidationMessage('Passwords do not match')
+                        return false
+                    }
+
+                    return { username, password, role }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { username, password, role } = result.value
+                    registerUser(username, password, role)
+                }
+            })
+        })
+
+        function registerUser(username, password, role) {
+            showSpinner()
+            $.ajax({
+                url: "{{ url_for('register') }}",
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    'username': username,
+                    'password': password,
+                    'role': role
+                }),
+                success: function (data) {
+                    hideSpinner()
+
+                    Toast.fire({
+                        icon: data.status,
+                        title: data.msg
+                    })
+
+                    if (data.status === 'success') {
+                        window.location.reload()
+                    }
+                },
+                error: function (xhr, status, error) {
+                    hideSpinner()
+                    let errorMsg = 'An error occurred while registering'
+                    if (xhr.responseJSON && xhr.responseJSON.msg) {
+                        errorMsg = xhr.responseJSON.msg
+                    }
+                    Toast.fire({
+                        icon: 'error',
+                        title: xhr.responseJSON.msg
+                    })
+                }
+            })
+        }
+
+        function initializeDataTable() {
+            return $('#users-table').DataTable({
+                paging: true,
+                ordering: true,
+                order: [[4, "desc"]],
+                info: true,
+                dom: `<"top"lf><"table-responsive"t><"bottom"ip><"clear">`,
+                initComplete: function () {
+                    setupSearchBox()
+                    hideDefaultControls()
+                },
+                rowCallback: function (row, data) {
+                    $(row).addClass('bg-white border-b hover:bg-gray-50')
+                },
+                drawCallback: function () {
+                    $('.dataTables_paginate ul').addClass('inline-flex -space-x-px rtl:space-x-reverse text-sm h-8')
+                    $('.dataTables_paginate li').addClass('cursor-pointer flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700')
+                    $('.dataTables_paginate .paginate_button.active').addClass('text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700')
+                    hideSpinner()
+                },
+                draw: function () {
+                    hideSpinner()
+                }
+            })
+        }
+
+        function hideDefaultControls() {
+            $('.dataTables_filter').hide()
+            $('.dataTables_length').hide()
+        }
+
+        function setupSearchBox() {
+            const searchBox = $('#table-search')
+            const dataTableSearchBox = $('.dataTables_filter input')
+            searchBox.on('input', function () {
+                dataTableSearchBox.val($(this).val()).trigger('input')
+            })
+        }
+
+        table = initializeDataTable()
+    })
+</script>

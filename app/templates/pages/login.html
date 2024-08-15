@@ -1,0 +1,74 @@
+<section class="bg-gray-50">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 grid lg:grid-cols-2 gap-8 lg:gap-16">
+        <div class="flex flex-col justify-center">
+            <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl">
+                Helmet Detection Project</h1>
+            <p class="mb-6 text-lg font-normal text-gray-500 lg:text-xl">Login Page</p>
+        </div>
+        <div>
+            <div class="w-full lg:max-w-xl p-6 space-y-8 sm:p-8 bg-white rounded-lg shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-900">
+                    LOGIN
+                </h2>
+                <div id="alert" class="hidden p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
+                    <span class="font-medium">Danger alert!</span> Change a few things up and try submitting again.
+                </div>
+                <form id="login" class="mt-8 space-y-6">
+                    <div>
+                        <label for="username" class="block mb-2 text-sm font-medium text-gray-900">Username</label>
+                        <input type="text" name="username" id="username"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            placeholder="user01" required />
+                    </div>
+                    <div>
+                        <label for="password" class="block mb-2 text-sm font-medium text-gray-900">Password</label>
+                        <input type="password" name="password" id="password" placeholder="••••••••"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            required />
+                    </div>
+                    <button type="submit"
+                        class="w-full px-5 py-3 text-base font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 sm:w-auto">Login
+                        to dashboard</button>
+                    <div class="text-sm font-medium text-gray-900 ">
+                        หากล็อกอินไม่ได้โปรดติดต่อผู้ดูแลระบบ
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    $('#login').on('submit', function (e) {
+        e.preventDefault()
+
+        fromData = $(this).serialize()
+
+        showSpinner()
+        $.ajax({
+            url: "{{ url_for('login') }}",
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                'username': $('#username').val(),
+                'password': $('#password').val()
+            }),
+            success: function (data) {
+                if (data.status == 'success') {
+                    window.location.replace('dashboard')
+                } else {
+                    $('#alert').removeClass('hidden')
+                    $('#alert').html(data.msg)
+                }
+                hideSpinner()
+            },
+            error: function (xhr, status, error) {
+                hideSpinner()
+                Toast.fire({
+                    icon: 'error',
+                    title: 'An error occurred while login'
+                })
+            }
+        })
+    })
+</script>

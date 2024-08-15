@@ -1,0 +1,324 @@
+<!-- Search -->
+<div class="mb-4 rounded bg-gray-50 dark:bg-gray-800">
+  <div class="bg-white rounded-lg shadow p-4 md:p-6">
+    <div class="flex justify-between">
+      <div>
+        <select id="selectmonitor"
+          class="m-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+          <option value="">All</option>
+        </select>
+      </div>
+
+      <div id="date-range-picker" date-rangepicker class="flex items-center">
+        <div class="relative">
+          <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor" viewBox="0 0 20 20">
+              <path
+                d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+            </svg>
+          </div>
+          <input id="date-start" name="start" type="text"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Select date start">
+        </div>
+        <label class="mx-4 text-gray-500">ถึง</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor" viewBox="0 0 20 20">
+              <path
+                d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+            </svg>
+          </div>
+          <input id="date-end" name="end" type="text"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Select date end">
+        </div>
+        <div class="ms-6">
+          <button id="datesubmit" type="button"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Search</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bar chart -->
+<div class="grid lg:grid-cols-3 gap-4 mb-4">
+  <div class=" bg-white rounded-lg shadow p-4 md:p-6">
+    <div class="flex justify-between mb-3">
+      <div class="flex items-center">
+        <div class="flex justify-center items-center">
+          <h5 class="text-xl font-bold leading-none text-gray-900 pe-1">Motocycle
+          </h5>
+        </div>
+      </div>
+    </div>
+    <div class="bg-gray-50 p-3 rounded-lg">
+      <div class="grid grid-cols-3 gap-3">
+        <dl class="bg-blue-50 rounded-lg flex flex-col items-center justify-center h-[78px]">
+          <dt id="d1-total" class="text-blue-600 text-sm font-medium flex items-center justify-center mb-1">
+            -</dt>
+          <dd class="text-blue-600 text-sm font-medium">คัน</dd>
+        </dl>
+        <dl class="bg-teal-50 rounded-lg flex flex-col items-center justify-center h-[78px]">
+          <dt id="d1-driver" class="text-teal-600 text-sm font-medium flex items-center justify-center mb-1">
+            -</dt>
+          <dd class="text-teal-600 text-sm font-medium">ใส่หมวก</dd>
+        </dl>
+        <dl class="bg-orange-50 rounded-lg flex flex-col items-center justify-center h-[78px]">
+          <dt id="d1-pillion" class="text-orange-600 text-sm font-medium flex items-center justify-center mb-1">
+            -</dt>
+          <dd class="text-orange-600 text-sm font-medium">ไม่ใส่หมวก</dd>
+        </dl>
+      </div>
+    </div>
+    <div id="d1"></div>
+  </div>
+  <div class=" bg-white rounded-lg shadow p-4 md:p-6">
+    <div class="flex justify-between mb-3">
+      <div class="flex items-center">
+        <div class="flex justify-center items-center">
+          <h5 class="text-xl font-bold leading-none text-gray-900 pe-1">Driver
+          </h5>
+        </div>
+      </div>
+    </div>
+    <div class="bg-gray-50 p-3 rounded-lg">
+      <div class="grid grid-cols-3 gap-3">
+        <dl class="bg-blue-50 rounded-lg flex flex-col items-center justify-center h-[78px]">
+          <dt id="d2-total" class="text-blue-600 text-sm font-medium flex items-center justify-center mb-1">
+            -</dt>
+          <dd class="text-blue-600 text-sm font-medium">คน</dd>
+        </dl>
+        <dl class="bg-teal-50 rounded-lg flex flex-col items-center justify-center h-[78px]">
+          <dt id="d2-driver" class="text-teal-600 text-sm font-medium flex items-center justify-center mb-1">
+            -</dt>
+          <dd class="text-teal-600 text-sm font-medium">ใส่หมวก</dd>
+        </dl>
+        <dl class="bg-orange-50 rounded-lg flex flex-col items-center justify-center h-[78px]">
+          <dt id="d2-pillion" class="text-orange-600 text-sm font-medium flex items-center justify-center mb-1">
+            -</dt>
+          <dd class="text-orange-600 text-sm font-medium">ไม่ใส่หมวก</dd>
+        </dl>
+      </div>
+    </div>
+    <div id="d2"></div>
+  </div>
+  <div class=" bg-white rounded-lg shadow p-4 md:p-6">
+    <div class="flex justify-between mb-3">
+      <div class="flex items-center">
+        <div class="flex justify-center items-center">
+          <h5 class="text-xl font-bold leading-none text-gray-900 pe-1">Pillion
+          </h5>
+        </div>
+      </div>
+    </div>
+    <div class="bg-gray-50 p-3 rounded-lg">
+      <div class="grid grid-cols-3 gap-3">
+        <dl class="bg-blue-50 rounded-lg flex flex-col items-center justify-center h-[78px]">
+          <dt id="d3-total" class="text-blue-600 text-sm font-medium flex items-center justify-center mb-1">
+            -</dt>
+          <dd class="text-blue-600 text-sm font-medium">คน</dd>
+        </dl>
+        <dl class="bg-teal-50 rounded-lg flex flex-col items-center justify-center h-[78px]">
+          <dt id="d3-driver" class="text-teal-600 text-sm font-medium flex items-center justify-center mb-1">
+            -</dt>
+          <dd class="text-teal-600 text-sm font-medium">ใส่หมวก</dd>
+        </dl>
+        <dl class="bg-orange-50 rounded-lg flex flex-col items-center justify-center h-[78px]">
+          <dt id="d3-pillion" class="text-orange-600 text-sm font-medium flex items-center justify-center mb-1">
+            -</dt>
+          <dd class="text-orange-600 text-sm font-medium">ไม่ใส่หมวก</dd>
+        </dl>
+      </div>
+    </div>
+    <div id="d3"></div>
+  </div>
+</div>
+
+<!-- Line chart -->
+<div class="mb-4 rounded bg-gray-50">
+  <div class="bg-white rounded-lg shadow p-4 md:p-6">
+    <div class="flex items-center justify-start w-full mb-6">
+      <label for="selectfrequency" class="block text-sm font-medium text-gray-900">Select Frequency: </label>
+      <select id="selectfrequency"
+        class="m-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+        <option value="h">Hour</option>
+        <option value="d" selected>Day</option>
+        <option value="m">Month</option>
+      </select>
+    </div>
+    <div id="linechart"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script>
+  $(function () {
+    let all_data, driver_data, pillion_data, tsChart, dateStart, dateEnd, monitorValue
+    let frequencyValue = 'd'
+
+    function fetchMonitor() {
+      $.ajax({
+        url: `${ENDPOINT}/api/v1/monitor`,
+        success: function (response) {
+          response.data.forEach(option => {
+            const newOption = $('<option></option>')
+              .attr('value', option[0])
+              .text(option[1])
+            $('#selectmonitor').append(newOption)
+          })
+        },
+        error: function (error) {
+          console.log(error.response)
+        }
+      })
+    }
+
+    $('#selectmonitor').change(function () {
+      monitorValue = $(this).val()
+      displayBarChart(dateStart, dateEnd)
+    })
+
+    fetchMonitor()
+
+    function convertDateFormat(date) {
+      const [month, day, year] = date.split('/').map(Number)
+      const dateObj = new Date(year, month - 1, day)
+      return `${dateObj.getFullYear()}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}`
+    }
+
+    $('#selectfrequency').change(function () {
+      frequencyValue = $(this).val()
+      displayLineChart(dateStart, dateEnd, frequencyValue)
+    })
+
+    $('#datesubmit').click(function () {
+      dateStart = convertDateFormat($('#date-start').val())
+      dateEnd = convertDateFormat($('#date-end').val())
+      all_data = []
+      driver_data = []
+      pillion_data = []
+      displayBarChart(dateStart, dateEnd)
+    })
+
+    function createChart(id, data) {
+      const options = {
+        series: [{ data }],
+        chart: { type: 'bar' },
+        plotOptions: { bar: { borderRadius: 4, horizontal: false } },
+        dataLabels: { enabled: true },
+        xaxis: { categories: ['สวมหมวก', 'ไม่สวมหมวก'] }
+      }
+
+      return new ApexCharts(document.querySelector(id), options).render()
+    }
+
+    function displayBarChart(start = '', end = '') {
+      showSpinner()
+      fetch(`${ENDPOINT}/api/v1/data/detection/summary?start=${start}&end=${end}&monitor_id=${monitorValue}`)
+        .then(response => response.json())
+        .then(result => {
+          if (!result.data || !result.data[0][2]) {
+            Toast.fire({
+              icon: 'error',
+              title: 'No data.'
+            }).then(() => {
+              window.location.reload()
+            })
+          }
+          const Data = result.data[0]
+
+          all_data = [parseInt(Data[2]), parseInt(Data[3])]
+          driver_data = [parseInt(Data[6]), parseInt(Data[7])]
+          pillion_data = [parseInt(Data[8]), parseInt(Data[9])]
+
+          $('#d1-total').text(all_data.reduce((a, b) => a + b))
+          $('#d1-driver').text(((all_data[0] / all_data.reduce((a, b) => a + b)) * 100).toFixed(1) + '%')
+          $('#d1-pillion').text(((all_data[1] / all_data.reduce((a, b) => a + b)) * 100).toFixed(1) + '%')
+
+          $('#d2-total').text(driver_data.reduce((a, b) => a + b))
+          $('#d2-driver').text(((driver_data[0] / driver_data.reduce((a, b) => a + b)) * 100).toFixed(1) + '%')
+          $('#d2-pillion').text(((driver_data[1] / driver_data.reduce((a, b) => a + b)) * 100).toFixed(1) + '%')
+
+          $('#d3-total').text(pillion_data.reduce((a, b) => a + b))
+          $('#d3-driver').text(((pillion_data[0] / pillion_data.reduce((a, b) => a + b)) * 100).toFixed(1) + '%')
+          $('#d3-pillion').text(((pillion_data[1] / pillion_data.reduce((a, b) => a + b)) * 100).toFixed(1) + '%')
+
+          createChart('#d1', all_data)
+          createChart('#d2', driver_data)
+          createChart('#d3', pillion_data)
+
+          displayLineChart(start, end, frequencyValue)
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error)
+        })
+        .finally(() => {
+          hideSpinner()
+        })
+    }
+
+    function convertDate(isoDate) {
+      const date = new Date(isoDate);
+
+      const day = date.getDate().toString().padStart(2, '0')
+      const month = (date.getMonth() + 1).toString().padStart(2, '0')
+      const hour = date.getHours().toString().padStart(2, '0')
+      const minute = date.getMinutes().toString().padStart(2, '0')
+      const time = hour + minute == '0000' ? '' : `${hour}:${minute}`
+      return `${day}-${month} ${time}`
+    }
+
+    function displayLineChart(start = '', end = '', showtype = 'd') {
+      const tsURL = `${ENDPOINT}/api/v1/data/detection/chart?${showtype}=_&start=${start}&end=${end}&monitor_id=${monitorValue}`
+
+      fetch(tsURL)
+        .then(response => response.json())
+        .then(Data => {
+          let result = Data['data']
+          let driverSD = []
+          let pillionSD = []
+          let categories = []
+
+          result.forEach(entry => {
+            driverSD.push(parseInt(entry[0]))
+            pillionSD.push(parseInt(entry[1]))
+            categories.push(convertDate(new Date(entry[2])))
+          })
+
+          let tsoptions = {
+            series: [
+              { name: "คนขับ", data: driverSD },
+              { name: "คนซ้อน", data: pillionSD }
+            ],
+            chart: { height: 450, type: 'line', zoom: { enabled: true } },
+            dataLabels: { enabled: false },
+            stroke: { curve: 'smooth' },
+            title: { text: 'Motocycle with Helmet', align: 'left' },
+            grid: { row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } },
+            xaxis: { categories }
+          }
+
+          if (tsChart) {
+            tsChart.destroy()
+          }
+
+          tsChart = new ApexCharts(document.querySelector('#linechart'), tsoptions)
+          tsChart.render()
+
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error)
+        })
+        .finally(() => {
+          hideSpinner()
+        })
+    }
+
+    displayBarChart()
+  })
+</script>

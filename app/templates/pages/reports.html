@@ -1,0 +1,343 @@
+<div class="mb-4 rounded bg-gray-50 dark:bg-gray-800">
+    <div class="bg-white rounded-lg shadow p-4 md:p-6">
+        <div id="table-container" class="relative overflow-x-hidden">
+            <div class="flex justify-between mb-6">
+                <div class="flex items-center">
+                    <label for="selectmonitor">Monitor: </label>
+                    <select id="selectmonitor"
+                        class="m-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                        <option value="">All</option>
+                    </select>
+                </div>
+                <div id="date-range-picker" date-rangepicker class="flex items-center">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                            </svg>
+                        </div>
+                        <input id="date-start" name="start" type="text"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            placeholder="Select date start">
+                    </div>
+                    <label class="mx-4 text-gray-500">ถึง</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                            </svg>
+                        </div>
+                        <input id="date-end" name="end" type="text"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            placeholder="Select date end">
+                    </div>
+                    <div class="ms-6">
+                        <button id="datesubmit" type="button"
+                            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Search</button>
+                    </div>
+                </div>
+            </div>
+            <hr class="h-px my-8 bg-gray-200 border-0">
+            <div
+                class="flex flex-column sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4">
+                <div>
+                    <label for="selectentity" class="mb-2 text-sm font-medium text-gray-900">Show</label>
+                    <select id="selectentity"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+
+                <label for="table-search" class="sr-only">Search</label>
+                <div class="relative">
+                    <div
+                        class="absolute inset-y-0 left-0 rtl:inset-r-0 rtl:right-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="currentColor"
+                            viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd"
+                                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <input type="text" id="table-search"
+                        class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-full bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        placeholder="Search for items">
+                </div>
+            </div>
+
+            <table id="data-table" class="w-full text-left text-sm rtl:text-right text-gray-700">
+                <thead class="uppercase bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">รูป</th>
+                        <th scope="col" class="px-6 py-3">ประเภท</th>
+                        <th scope="col" class="px-6 py-3">สถานะ</th>
+                        <th scope="col" class="px-6 py-3">วันเวลา</th>
+                    </tr>
+                </thead>
+                <tbody id="dataBody">
+                </tbody>
+            </table>
+
+            <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4"
+                aria-label="Table navigation">
+                <span></span>
+                <ul id="custom-pagination" class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Main modal -->
+<div id="modalImage" tabindex="-1" aria-hidden="true"
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 id="modalHeader" class="text-xl font-semibold text-gray-900 dark:text-white"></h3>
+            </div>
+            <!-- Modal body -->
+            <div class="flex justify-center p-4 md:p-5">
+                <canvas id="Imagecanvas" class="figure-img img-fluid rounded w-100" style="height: 30rem"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const $modalImage = document.getElementById('modalImage')
+    const options = {
+        placement: 'bottom-right',
+        backdropClasses:
+            'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40',
+        closable: true
+    }
+    const instanceOptions = {
+        id: 'modalImage',
+        override: true
+    }
+
+    const modal = new Modal($modalImage, options, instanceOptions)
+</script>
+
+<script>
+    $(document).ready(function () {
+        const header = $('#modalHeader')
+        const tableContainer = $('#table-container')
+        let table
+        let observer
+        let monitorValue = ''
+
+        function fetchMonitor() {
+            $.ajax({
+                url: `${ENDPOINT}/api/v1/monitor`,
+                success: function (response) {
+                    response.data.forEach(option => {
+                        const newOption = $('<option></option>')
+                            .attr('value', option[0])
+                            .text(option[1])
+                        $('#selectmonitor').append(newOption)
+                    })
+                },
+                error: function (error) {
+                    console.log(error.response)
+                }
+            })
+        }
+
+        $('#selectmonitor').change(function () {
+            monitorValue = $(this).val()
+            fetchReports()
+        })
+
+        fetchMonitor()
+
+        function convertDateFormat(date) {
+            const [month, day, year] = date.split('/').map(Number)
+            const dateObj = new Date(year, month - 1, day)
+            return `${dateObj.getFullYear()}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}`
+        }
+
+        $('#datesubmit').click(function () {
+            const datestart = convertDateFormat($('#date-start').val())
+            const dateend = convertDateFormat($('#date-end').val())
+
+            fetchReports(datestart, dateend)
+        })
+
+        function fetchReports(datestart = '', dateend = '') {
+            showSpinner()
+            $.ajax({
+                url: `${ENDPOINT}/api/v1/data/detection/all?start=${datestart}&end=${dateend}&sort=desc&monitor_id=${monitorValue}`,
+                method: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    if (response && response.data) {
+                        const data = formatData(response.data)
+                        if ($.fn.DataTable.isDataTable('#data-table')) {
+                            table.clear().rows.add(data).draw()
+                        } else {
+                            table = initializeDataTable(data)
+                        }
+                        setupEventListeners(table)
+                    }
+                },
+                error: function (error) {
+                    hideSpinner()
+                    console.error('Error:', error)
+                }
+            })
+        }
+
+        function formatData(data) {
+            return data.map((v, i) => {
+                return {
+                    image: `<img data-id="${v[6]}" id="img-thumbnail-${i}" class="rounded cursor-zoom-in lazy" data-src="${ENDPOINT}/runs/images/raw-${v[0]}.jpg" style='max-height: 15rem'>`,
+                    type: `${v[4] == 1 ? "<span class='bg-indigo-100 text-indigo-800 font-bold me-2 px-2.5 py-0.5 rounded'>คนขับ</span>" : "<span class='bg-gray-100 text-gray-800 font-bold me-2 px-2.5 py-0.5 rounded'>คนซ้อน</span>"}${v[2] == 0.000 ? "" : `ความแม่นยำ: <strong>${(v[2] * 100).toFixed(1)}%</strong>`}`,
+                    helmet: `${v[3] == 1 ? "<span class='bg-green-100 text-green-800 font-bold me-2 px-2.5 py-0.5 rounded'>สวมหมวก</span>" : "<span class='bg-red-100 text-red-800 font-bold me-2 px-2.5 py-0.5 rounded'>ไม่สวมหมวก</span>"}${v[1] == 0.000 ? "" : `ความแม่นยำ: <strong>${(v[1] * 100).toFixed(1)}%</strong>`}`,
+                    date: v[5]
+                }
+            })
+        }
+
+        function initializeDataTable(data) {
+            return $('#data-table').DataTable({
+                data,
+                columns: [
+                    { data: 'image' },
+                    { data: 'type' },
+                    { data: 'helmet' },
+                    { data: 'date' }
+                ],
+                paging: true,
+                ordering: true,
+                order: [[3, "desc"]],
+                info: true,
+                dom: `<"top"lf><"table-responsive"t><"bottom"ip><"clear">`,
+                initComplete: function () {
+                    setupSearchBox()
+                    hideDefaultControls()
+                },
+                rowCallback: function (row, data) {
+                    $(row).addClass('bg-white border-b hover:bg-gray-50')
+                },
+                drawCallback: function () {
+                    $('.dataTables_paginate ul').addClass('inline-flex -space-x-px rtl:space-x-reverse text-sm h-8')
+                    $('.dataTables_paginate li').addClass('cursor-pointer flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700')
+                    $('.dataTables_paginate .paginate_button.active').addClass('text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700')
+                    setupImageLazyLoading()
+                    setupImageClickListeners()
+                    hideSpinner()
+                },
+                draw: function () {
+                    hideSpinner()
+                }
+            })
+        }
+
+        function setupSearchBox() {
+            const searchBox = $('#table-search')
+            const dataTableSearchBox = $('.dataTables_filter input')
+            searchBox.on('input', function () {
+                dataTableSearchBox.val($(this).val()).trigger('input')
+            })
+        }
+
+        function hideDefaultControls() {
+            $('.dataTables_filter').hide()
+            $('.dataTables_length').hide()
+        }
+
+        function setupEventListeners(table) {
+            $('#selectentity').on('change', function () {
+                table.page.len($(this).val()).draw()
+            })
+
+            table.on('length.dt', function () {
+                $('#selectentity').val(table.page.len())
+            })
+        }
+
+        function setupImageLazyLoading() {
+
+            const images = document.querySelectorAll('img.lazy')
+            if ('IntersectionObserver' in window) {
+                observer = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target
+                            img.src = img.dataset.src
+                            img.classList.remove('lazy')
+                            observer.unobserve(img)
+                        }
+                    })
+                })
+
+                images.forEach(img => observer.observe(img))
+            } else {
+                images.forEach(img => img.src = img.dataset.src)
+            }
+        }
+
+        function setupImageClickListeners() {
+            $('#data-table').on('click', 'img', function () {
+                const boxesId = this.getAttribute('data-id')
+                header.text(boxesId)
+                fetchBoundingBoxData(ENDPOINT, boxesId, this.dataset.src)
+            })
+        }
+
+        function fetchBoundingBoxData(ENDPOINT, boxesId, imageUrl) {
+            showSpinner()
+            $.ajax({
+                url: `${ENDPOINT}/api/v1/data/detection/bbox?did=${boxesId}&monitor_id=${monitorValue}`,
+                dataType: 'json',
+                success: function (response) {
+                    const boxdata = response['data'][0]
+                    const helmetbbox = boxdata.slice(1, 5)
+                    const personbbox = boxdata.slice(5)
+                    drawImageWithBoxes(imageUrl, helmetbbox, personbbox)
+                }
+            })
+        }
+
+        function drawImageWithBoxes(imageURL, helmetbbox, personbbox) {
+            const canvas = document.getElementById('Imagecanvas')
+            const ctx = canvas.getContext('2d')
+            const img = new Image()
+
+            img.onload = function () {
+                canvas.width = img.width
+                canvas.height = img.height
+                ctx.drawImage(img, 0, 0)
+                drawBoundingBox(ctx, helmetbbox, 'red', 3)
+                drawBoundingBox(ctx, personbbox, 'lime', 2)
+                modal.show()
+            }
+
+            img.src = imageURL
+            hideSpinner()
+        }
+
+        function drawBoundingBox(ctx, bbox, color, line) {
+            const [x1, y1, x2, y2] = bbox
+            ctx.strokeStyle = color
+            ctx.lineWidth = line
+            ctx.strokeRect(x1, y1, x2 - x1, y2 - y1)
+        }
+
+        fetchReports()
+    })
+
+</script>

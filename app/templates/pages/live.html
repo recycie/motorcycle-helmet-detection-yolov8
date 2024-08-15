@@ -1,0 +1,249 @@
+<div class="mb-4 rounded bg-gray-50">
+    <div class="bg-white rounded-lg shadow p-4 md:p-6">
+        <div class="flex justify-end">
+            <button id="startbtn" type="button"
+                class="text-white bg-red-600 hover:bg-red-400 border border-red-200 focus:ring-4 focus:outline-none focus:ring-red-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 mb-2">
+                <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                    height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 18V6l8 6-8 6Z" />
+                </svg>
+
+                Start
+            </button>
+        </div>
+        <div class="w-full aspect-video flex justify-center">
+            <img id="liveDisplay" class="" src="" alt="Live Display">
+            <div id="offlineDisplay" class="flex justify-center items-center aspect-video bg-gray-100 rounded">
+                <p class="text-2xl font-bold text-gray-700">Offline</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const monitor = $('#liveDisplay')
+    const offlinedisplay = $('#offlineDisplay')
+    const onlinedisplay = $('#liveDisplay')
+
+    offlinedisplay.show()
+    onlinedisplay.hide()
+
+    $(function () {
+
+        function getStatus() {
+            const eventSource = new EventSource(`${ENDPOINT}/api/v1/status`)
+
+            eventSource.onmessage = function (event) {
+                data = JSON.parse(event.data)
+                if (data.status) {
+                    monitor.attr("src", `${ENDPOINT}/api/v1/steam?res=1080`)
+                    offlinedisplay.hide()
+                    onlinedisplay.show()
+                } else {
+                    offlinedisplay.show()
+                    onlinedisplay.hide()
+                }
+            }
+            eventSource.onerror = function (error) {
+                offlinedisplay.show()
+                onlinedisplay.hide()
+            }
+        }
+        getStatus()
+
+
+        $('#stoplive').click(function () {
+            $.ajax({
+                url: `${ENDPOINT}/api/v1/detection/stop`,
+                success: function (response) {
+                    Toast.fire({
+                        icon: response['status'],
+                        title: response['msg']
+                    })
+                }
+            })
+        })
+        
+        function addSource() {
+            Swal.fire({
+                html: `
+                    <div class="flex flex-col justify-center">
+                        <p class="mb-1 text-lg font-semibold text-gray-900">Add Source</p>
+                    </div>
+                    <div id="add-form" class="mt-8 space-y-6">
+                        <div>
+                            <label for="source-name" class="text-left block mb-2 text-sm font-medium text-gray-900">Name</label>
+                            <input type="text" id="source-name" placeholder="Source Name"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+                        </div>
+                        <div>
+                            <label for="source-description" class="text-left block mb-2 text-sm font-medium text-gray-900">Description</label>
+                            <textarea id="source-description" placeholder="Source Description"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"></textarea>
+                        </div>
+                        <div>
+                            <label for="source-url" class="text-left block mb-2 text-sm font-medium text-gray-900">URL</label>
+                            <input type="text" id="source-url" placeholder="data/bru10.mp4"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Add',
+                customClass: {
+                    confirmButton: 'px-5 py-2.5 text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-center',
+                    cancelButton: 'px-5 py-2.5 text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-lg text-center',
+                },
+                preConfirm: () => {
+                    const name = $('#source-name').val();
+                    const description = $('#source-description').val();
+                    const url = $('#source-url').val();
+
+                    if (!name || !description || !url) {
+                        Swal.showValidationMessage('Please fill out all required fields');
+                        return false;
+                    }
+
+                    return { name, description, url };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { name, description, url } = result.value;
+                    showSpinner()
+                    $.ajax({
+                        url: `${ENDPOINT}/api/v1/monitor`,
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ name, description, url }),
+                        success: (response) => {
+                            hideSpinner()
+                            Toast.fire({
+                                icon: response.status,
+                                title: response.msg
+                            }).then(() => {
+                                selectorModal()
+                            })
+                        },
+                        error: (xhr, status, error) => {
+                            hideSpinner()
+                            Toast.fire({
+                                icon: xhr.responseJSON.status,
+                                title: xhr.responseJSON.msg
+                            })
+                        }
+                    });
+                }
+            });
+        }
+
+        async function fetchSource() {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: `${ENDPOINT}/api/v1/monitor`,
+                    success: function (response) {
+                        if (response['status'] == 'success') {
+                            resolve(response['data'])
+                        } else {
+                            resolve([])
+                        }
+                    },
+                    error: function (error) {
+                        reject(error)
+                    }
+                })
+            })
+        }
+
+        function startDetection(value) {
+            showSpinner()
+            $.ajax({
+                url: `${ENDPOINT}/api/v1/detection/start?monitor_id=${value}`,
+                success: function (response) {
+                    if (response.status == 'success') {
+                        $('#liveDisplay').attr("src", `${ENDPOINT}/api/v1/steam`)
+                    }
+                    Toast.fire({
+                        icon: response.status,
+                        title: response.msg
+                    })
+                    hideSpinner()
+                },
+                error: function (error) {
+                    hideSpinner()
+                    Toast.fire({
+                        icon: error.responseJSON.status,
+                        title: error.responseJSON.msg
+                    })
+                }
+            })
+
+        }
+
+        async function selectorModal() {
+            showSpinner()
+            let source = await fetchSource()
+            let sourcelist = ''
+            source.forEach(data => {
+                sourcelist += `
+                    <li>
+                        <input type="radio" id="source-${data[0]}" name="source" value="${data[0]}" class="hidden peer">
+                        <label for="source-${data[0]}" class="inline-flex items-center justify-between w-full p-5 text-gray-900 bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-900 hover:bg-gray-100">
+                            <div class="block">
+                                <div class="w-full text-lg font-semibold">${data[1]}</div>
+                                <div class="w-full text-sm text-gray-600">${data[3]}</div>
+                                <div class="w-full text-gray-500">${data[2]}</div>
+                            </div>
+                        </label>
+                    </li>
+                    `})
+
+            hideSpinner()
+            Swal.fire({
+                html: `
+                <div class="p-4 md:p-5">
+                    <p class="text-gray-500 mb-4">Select Video/URL:</p>
+                    <ul class="text-left space-y-4 mb-4 source">
+                        ${sourcelist}
+                    </ul>
+                </div>`,
+                showConfirmButton: true,
+                showDenyButton: true,
+                denyButtonText: `Add Source`,
+                confirmButtonText: 'Start Detection',
+                showCancelButton: false,
+                showLoaderOnConfirm: true,
+                showLoaderOnDeny: true,
+                customClass: {
+                    confirmButton: 'items-center text-white justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center',
+                    denyButton: 'items-center text-white justify-center bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center',
+                },
+                preConfirm: () => {
+                    var selected = $('input[name="source"]:checked').val()
+
+                    if (!selected) {
+                        Swal.showValidationMessage('Please select a source before detection.')
+                        return false
+                    }
+
+                    return { selected }
+                },
+
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (result.value) {
+                        startDetection(result.value.selected)
+                    }
+                } else if (result.isDenied) {
+                    addSource()
+                }
+            })
+        }
+
+        $('#startbtn').click(async function () {
+            await selectorModal()
+        })
+    })
+</script>
