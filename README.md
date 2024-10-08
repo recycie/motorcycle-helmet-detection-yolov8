@@ -76,4 +76,4 @@ For any queries or support, please contact:
 
 Pete - kasidetpete@gmail.com
 
-Project Link: [https://github.com/your-username/helmet-detection-system](https://github.com/your-username/helmet-detection-system)
+Project Link: [https://github.com/recycie/motorcycle-helmet-detection-yolov8](https://github.com/recycie/motorcycle-helmet-detection-yolov8)
