@@ -21,8 +21,7 @@
             <div class="flex items-center md:order-0 space-x-1 md:space-x-0">
                 <button type="button" data-dropdown-toggle="server-dropdown-menu"
                     class="border border-gray-100 inline-flex items-center font-medium justify-center px-4 py-2 text-sm text-gray-900 rounded-lg cursor-pointer hover:bg-gray-100">
-                    {{session}}
-                    {% if session and session[current_user.username][1] %}
+                    {% if session and session[current_user.username] %}
                     {{ session[current_user.username][1] }}
                     {% else %}
                     เลือก Server

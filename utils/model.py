@@ -27,21 +27,6 @@ class Model:
         self.input_type = {'tensor(float)': np.float32, 'tensor(float16)': np.float16}[self.session.get_inputs()[0].type]
 
     def predict(self, frame:np):
-
-        # img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # img = cv2.resize(img, (frame.shape[1], frame.shape[0]))
-        # img_data = np.array(img) / 255.0
-        # img_data = np.transpose(img_data, (2, 0, 1))
-        # image_array = np.expand_dims(img_data, axis=0).astype(np.float32)
-
-        # im = np.stack(self.pre_transform(im))
-        # im = im[..., ::-1].transpose((0, 3, 1, 2))  # BGR to RGB, BHWC to BCHW, (n, 3, h, w)
-        # im = np.ascontiguousarray(im)  # contiguous
-        # im = torch.from_numpy(im)
-        # img = im.to(self.device)
-        # img = img.half() if self.model.fp16 else img.float()  # uint8 to fp16/32
-        # img /= 255
-        
         image = frame.transpose((2, 0, 1))
         image_array = np.expand_dims(image, 0)
         image_array = np.ascontiguousarray(image_array)

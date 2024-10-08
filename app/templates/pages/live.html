@@ -11,6 +11,16 @@
 
                 Start
             </button>
+            <button id="stopbtn" type="button"
+                class="hidden text-white bg-red-600 hover:bg-red-400 border border-red-200 focus:ring-4 focus:outline-none focus:ring-red-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 mb-2">
+                <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                    height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 18V6l8 6-8 6Z" />
+                </svg>
+
+                Stop
+            </button>
         </div>
         <div class="w-full aspect-video flex justify-center">
             <img id="liveDisplay" class="" src="" alt="Live Display">
@@ -54,10 +64,15 @@
         getStatus()
 
 
-        $('#stoplive').click(function () {
+        $('#stopbtn').click(function () {
             $.ajax({
                 url: `${ENDPOINT}/api/v1/detection/stop`,
+                headers: {
+                    'x-api-key': API_KEY
+                },
                 success: function (response) {
+                    $('#startbtn').show()
+                    $('#stopbtn').hide()
                     Toast.fire({
                         icon: response['status'],
                         title: response['msg']
@@ -117,6 +132,9 @@
                         type: 'POST',
                         contentType: 'application/json',
                         data: JSON.stringify({ name, description, url }),
+                        headers: {
+                            'x-api-key': API_KEY
+                        },
                         success: (response) => {
                             hideSpinner()
                             Toast.fire({
@@ -142,6 +160,9 @@
             return new Promise((resolve, reject) => {
                 $.ajax({
                     url: `${ENDPOINT}/api/v1/monitor`,
+                    headers: {
+                    'x-api-key': API_KEY
+                    },
                     success: function (response) {
                         if (response['status'] == 'success') {
                             resolve(response['data'])
@@ -160,10 +181,15 @@
             showSpinner()
             $.ajax({
                 url: `${ENDPOINT}/api/v1/detection/start?monitor_id=${value}`,
+                headers: {
+                'x-api-key': API_KEY
+                },
                 success: function (response) {
                     if (response.status == 'success') {
                         $('#liveDisplay').attr("src", `${ENDPOINT}/api/v1/steam`)
                     }
+                    $('#startbtn').hide()
+                    $('#stopbtn').show()
                     Toast.fire({
                         icon: response.status,
                         title: response.msg

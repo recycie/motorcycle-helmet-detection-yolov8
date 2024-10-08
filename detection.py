@@ -8,10 +8,9 @@ import streamlink
 import hashlib
 import threading
 import json
-import jwt
 import configparser
-from datetime import datetime, timedelta, timezone
-from flask import Flask, jsonify, request, Response, g
+from functools import wraps
+from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from utils.mysql import *
 from utils.model import Model, letterbox, non_max_suppression, calculate_iou
@@ -21,6 +20,8 @@ from utils.predict_seg import YOLO_SEGMENT
 tracker = Sort()
 app = Flask(__name__, static_folder="runs")
 CORS(app)
+
+api_key = []  
 
 def create_default_config(config_file):
     config = configparser.ConfigParser()
@@ -128,20 +129,29 @@ def generate(resolution):
             time.sleep(0.1)
             continue
 
+def api_key_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        api_key = request.headers.get('x-api-key')
+        if not api_key or api_key not in api_key:
+            return jsonify({"error": "Unauthorized", "message": "Invalid or missing API key"}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route("/api/v1/steam")
+# @api_key_required
 def videosteam():
     try:
         res = request.args.get("res", type=int)
         if res in resolution:
             res = resolution[resolution.index(res)]
         else:
-            res = resolution[0]  # Default to the smallest resolution if not valid
+            res = resolution[0]
 
         return Response(generate(res), mimetype="multipart/x-mixed-replace; boundary=frame")
     
     except Exception as e:
         print("Error in videosteam endpoint:", e)
-        # Provide a JSON error response with a 500 status code
         return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
 
 @app.errorhandler(404)
@@ -153,9 +163,9 @@ def internal_error(error):
     return jsonify({"error": "Internal Server Error", "message": str(error)}), 500
 
 @app.route("/api/v1/monitor", methods=['GET', 'POST'])
+@api_key_required
 def getMonitor():
     try:
-        
         if request.method == 'GET':
             cmd = "SELECT * FROM monitor"
 
@@ -185,6 +195,7 @@ def getMonitor():
         return jsonify({"status": "error", "msg": "Internal Server Error", "error": str(e)}), 500
 
 @app.route("/api/v1/detection/<string:method>", methods=['GET'])
+@api_key_required
 def toggle(method: str):
     global status, monitor_id
 
@@ -239,28 +250,8 @@ def toggle(method: str):
 
     return jsonify({"status": "error", "msg": "Invalid method specified."})
 
-@app.route("/api/v1/confidences", methods=['GET'])
-def set_confidence():
-    global status, helmet_conf, helmet_iou, motorcycle_conf, motorcycle_iou, person_conf, person_iou
-
-    if request.method == "GET":
-        helmet_conf = request.args.get("helmet_conf", type=float) if request.args.get("helmet_conf", type=float) else helmet_conf
-        helmet_iou = request.args.get("helmet_iou", type=float) if request.args.get("helmet_iou", type=float) else helmet_iou
-        motorcycle_conf = request.args.get("motorcycle_conf", type=float) if request.args.get("motorcycle_conf", type=float) else motorcycle_conf
-        motorcycle_iou = request.args.get("motorcycle_iou", type=float) if request.args.get("motorcycle_iou", type=float) else motorcycle_iou
-        person_conf = request.args.get("person_conf", type=float) if request.args.get("person_conf", type=float) else person_conf
-        person_iou = request.args.get("person_iou", type=float) if request.args.get("person_iou", type=float) else person_iou
-
-    return jsonify({
-            "helmet_conf": helmet_conf, 
-            "helmet_iou": helmet_iou, 
-            "motorcycle_conf": motorcycle_conf, 
-            "motorcycle_iou": motorcycle_iou, 
-            "person_conf": person_conf, 
-            "person_iou": person_iou
-        })
-
 @app.route('/api/v1/status')
+# @api_key_required
 def get_status():
     def status_data():
         while True:
@@ -269,15 +260,8 @@ def get_status():
             time.sleep(0.5)
     return Response(status_data(), content_type='text/event-stream')
 
-@app.route('/api/v1/result')
-def get_result():
-    def result_data():
-        while True:
-            yield f"data: {json.dumps(detected_data)}\n\n"
-            time.sleep(0.1)
-    return Response(result_data(), content_type='text/event-stream')
-
 @app.route("/api/v1/data/detection/<string:method>", methods=['GET'])
+@api_key_required
 def getDetectionData(method):
     if request.method != "GET":
         return jsonify({"data": None})
@@ -356,7 +340,7 @@ def getDetectionData(method):
             cmd += f" ORDER BY created_at {sort.upper()}"
 
         if limit_value and limit_value.isnumeric():
-            cmd += f" LIMIT %s"
+            cmd += " LIMIT %s"
             params.append(limit_value)
 
         
@@ -367,18 +351,6 @@ def getDetectionData(method):
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({"data": None})
-
-def generate_token():
-    expiry = datetime.now(timezone.utc) + timedelta(days=3650)
-
-    # Create JWT token (permanent token)
-    token = jwt.encode({'user': 'APIPERMANENTTOKEN', 'exp': expiry}, app.config['SECRET_KEY'], algorithm='HS256')
-
-    # # Save token to a file
-    # with open('token.json', 'w') as f:
-    #     f.write(token)
-
-    # return token.decode('UTF-8')
 
 def generate_id(base_int, length):
     # Get the current timestamp
@@ -425,9 +397,10 @@ def draw_box(image, box, color=COLORS['red'], thickness=1):
     cv2.rectangle(image, (box[0], box[1]), (box[2], box[3]), color, thickness)
 
 def person_segment(img, id):
-    global detected_data
+    global detected_data, helmet_count, no_helmet_count
     image = img.copy()
-    boxs, scores, classids, masks = rider_model.predict(img, conf=0.5, iou=0.45)
+    # image_org = img.copy()
+    boxs, scores, classids, masks = rider_model.predict(img, conf=person_conf, iou=person_iou)
 
     motorcycle_id = generate_id(id, 10)
     
@@ -443,48 +416,42 @@ def person_segment(img, id):
         img_fill[mask == 0] = 0
 
         person_score = round(float(score), 3)
-        # FNF = f"runs/images/{score}_{IMAGE_NAME}"
 
         helmet_result = helmet_detection(img_fill)
+        
         if cls == 0:
             driver = 1
             draw_box(image, person_box, COLORS['green'], 2)
         else:
             driver = 0
             draw_box(image, person_box, COLORS['red'], 2)
-
+        
         cv2.putText(image, f"{person_score}", (person_box[2], person_box[1] - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.4, COLORS['black'], thickness=1)
 
 
-        ddt = []
+        # ddt = []
         # Helmet check
         if len(helmet_result) > 0:
             helmet_score = helmet_result[1]
             helmet_bbox = helmet_result[0]
-            hashed = generate_id(id, 24)
-
             for i in tracking_box:
                 if i["id"] == id:
                     i["helmet"] = True
-                    ddt.append([motorcycle_id, helmet_score, person_score, driver, 1])
-
-                    # DIR_IMAGE = f"runs/images/{temp_folder}/helmet"
-                    # DIR_IMAGE = f"runs/images/helmet"
-
+                    helmet_count += 1
+                    
                     draw_box(image, helmet_bbox, COLORS['yellow'], 3)
                     cv2.putText(image, f"{person_score}", (helmet_bbox[2], helmet_bbox[1] - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.4, COLORS['black'], thickness=1)
+                    
+                    hashed = generate_id(id, 24)
                     DATABASE.insert_detection(hashed, motorcycle_id, monitor_id, driver, 1, helmet_score, person_score)
                     DATABASE.insert_bbox(hashed, helmet_bbox[0], helmet_bbox[1], helmet_bbox[2], helmet_bbox[3], person_box[0], person_box[1], person_box[2], person_box[3])
         else:
-            hashed = generate_id(id, 24)
             for i in tracking_box:
                 if i["id"] == id and i["helmet"] != True:
                     i["helmet"] = False
-                    ddt.append([motorcycle_id, 0, person_score, driver, 0])
-
-                    # DIR_IMAGE = f"runs/images/{temp_folder}/nohelmet"
-                    # DIR_IMAGE = f"runs/images/nohelmet"
-
+                    # ddt.append([motorcycle_id, 0, person_score, driver, 0])
+                    no_helmet_count += 1
+                    hashed = generate_id(id, 24)
                     DATABASE.insert_detection(hashed, motorcycle_id, monitor_id, driver, 0, 0, person_score)
                     DATABASE.insert_bbox(hashed, 0, 0, 0, 0, person_box[0], person_box[1], person_box[2], person_box[3])
 
@@ -497,10 +464,6 @@ def person_segment(img, id):
     cv2.imwrite(FN, image)
     FN = f"{DIR_IMAGE}/raw-{IMAGE_NAME}"
     cv2.imwrite(FN, img)
-
-    for dd in ddt:
-        detected_data = dd
-        time.sleep(0.5)
 
 def helmet_detection(image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -525,11 +488,26 @@ def helmet_detection(image):
 
     return helmet_bbox
 
+def xml_to_yolo_bbox(bbox, w, h):
+    # xmin, ymin, xmax, ymax
+    x_center = ((bbox[2] + bbox[0]) / 2) / w
+    y_center = ((bbox[3] + bbox[1]) / 2) / h
+    width = (bbox[2] - bbox[0]) / w
+    height = (bbox[3] - bbox[1]) / h
+    return [x_center, y_center, width, height]
+
 def main(url):
-    global steamFrame, motorcycle_count, helmet_count, tracking_box, status
+    global steamFrame, motorcycle_count, helmet_count, tracking_box, status, no_helmet_count
 
     cap = None
     try:
+        # Reset Count
+        no_helmet_count = 0
+        helmet_count = 0
+        motorcycle_count = 0
+        tracking_box = []
+        steamFrame = None
+
         # Set up video capture
         stream_url = streamlink.streams(url)["best"].url if "youtube" in url else url
         cap = cv2.VideoCapture(stream_url)
@@ -553,6 +531,7 @@ def main(url):
 
                 status = True
                 frame = imutils.resize(frame)
+                frame_original = frame.copy()
                 image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 image, ratio, dwdh = letterbox(image, auto=False)
                 
@@ -592,8 +571,8 @@ def main(url):
                                         if calculate_iou(box, count_area) > 0:
                                             motorcycle_count += 1
                                             tracking_box[found]['save'] = True
-
-                                            cropped_image = frame[box[1]:box[3], box[0]:box[2]]
+                                            
+                                            cropped_image = frame_original[box[1]:box[3], box[0]:box[2]]
                                             if tracking_box[found]['helmet'] is None:
                                                 tracking_box[found]['helmet'] = "Processing"
                                                 threading.Thread(target=person_segment, args=(cropped_image, tracking_box[found]['id']), daemon=True).start()
@@ -620,7 +599,7 @@ def main(url):
                 fps = int(1000 / processing_time)
                 cv2.putText(frame, f"{motorcycle_count} Motorcycle", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 230, 255), 3)
                 cv2.putText(frame, f"{helmet_count} Helmet", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 230, 255), 3)
-                cv2.putText(frame, f"{motorcycle_count - helmet_count} No Helmet", (20, 150), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 230, 255), 3)
+                cv2.putText(frame, f"{no_helmet_count} No Helmet", (20, 150), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 230, 255), 3)
                 cv2.putText(frame, f"{fps} fps", (20, 200), cv2.FONT_HERSHEY_SIMPLEX, 1.5, COLORS['orange'], 2)
                 cv2.rectangle(frame, (count_area[0], count_area[1]), (count_area[2], count_area[3]), (125, 110, 255), 2)
 
@@ -639,7 +618,11 @@ def main(url):
             cap.release()
 
 if __name__ == "__main__":
-    config = load_config('config.ini')
+    # Load config.ini
+    config_file = 'config.ini'
+    if not os.path.exists(config_file):
+        create_default_config(config_file)
+    config = load_config(config_file)
 
     steamFrame = None
     save_vid = False
@@ -648,6 +631,7 @@ if __name__ == "__main__":
     tracking_box = []
     motorcycle_count = 0
     helmet_count = 0
+    no_helmet_count = 0
     monitor_id = 0
     resolution = [240, 360, 480, 720, 1080]
 
@@ -657,6 +641,7 @@ if __name__ == "__main__":
 
     # Configure Flask app
     app.config['SECRET_KEY'] = config['app']['secret_key']
+    api_key = [config['app']['secret_key']]
 
     # Motorcycle Model Configuration
     motorcycle_file = config['motorcycle']['file']
@@ -683,6 +668,7 @@ if __name__ == "__main__":
         p=config['database']['password'],
         db=config['database']['dbname']
     )
+
 
     # Run the Flask app
     app.run(

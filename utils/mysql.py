@@ -16,28 +16,34 @@ class Database:
       )
       self.dbcon = self.con.cursor()
 
-    def select(self, sql_command, val=()):
-      try:
-        self.connection()
-        self.dbcon.execute(sql_command, val)
-        result = self.dbcon.fetchall()
-        return result
-      except Exception as e:
-        print(e)
-        return None
+    def select(self, sql_command, val=(), retries=3):
+        for attempt in range(retries):
+            try:
+                self.connection()
+                self.dbcon.execute(sql_command, val)
+                result = self.dbcon.fetchall()
+                return result
+            except Exception as e:
+                print(f"Attempt {attempt + 1} failed: {e}")
+                if attempt + 1 == retries:
+                    print(f"All {retries} attempts failed.")
+                    return None
 
-    def insert(self, sql_command, val):
-      try:
-        self.connection()
-        self.dbcon.execute(sql_command, val)
-        self.con.commit()
+    def insert(self, sql_command, val, retries=3):
+        for attempt in range(retries):
+            try:
+                self.connection()
+                self.dbcon.execute(sql_command, val)
+                self.con.commit()
 
-        if self.dbcon.rowcount:
-          return True
-        return False
-      except Exception as e:
-          print("sql: "+str(e))
-          return False
+                if self.dbcon.rowcount:
+                    return True
+                return False
+            except Exception as e:
+                print(f"Attempt {attempt + 1} failed: sql: {e}")
+                if attempt + 1 == retries:
+                    print(f"All {retries} attempts failed.")
+                    return False
 
     def insert_detection(self, id, motocycle_id, monitor_id, driver, helmet, helmet_score, person_score):
       sql_command = "INSERT INTO `detection`(`id`, `motorcycle_id`, `monitor_id`, `driver`, `helmet`, `helmet_score`, `person_score`) VALUES (%s, %s, %s, %s, %s, %s, %s)"
@@ -57,30 +63,6 @@ class Database:
     def update_source(self, name, url, id):
         sql_command = "UPDATE monitor set name = %s, url = %s, status = %s WHERE id = %s"
         val = (name, url, id)
-        try:
-          self.connection()
-          self.dbcon.execute(sql_command, val)
-          self.con.commit()
-
-          if self.dbcon.rowcount:
-            return True
-          return False
-        except:
-           return False
-        
-    def insert_log(self, info, action, ip):
-        sql_command = "INSERT INTO logs (info, action, ip) VALUES (%s, %s, %s)"
-        val = (info, action, ip)
-        self.insert(sql_command, val)
-        
-    def insert_setting(self, key, info, action, ip):
-        sql_command = "INSERT INTO setting (key_name, info, action, ip) VALUES (%s, %s, %s, %s)"
-        val = (key, info, action, ip)
-        self.insert(sql_command, val)
-        
-    def update_setting(self, key, info, action, ip, id):
-        sql_command = "UPDATE SET setting key_name = %s, info = %s, action = %s, ip = %s WHERE id = %s"
-        val = (key, info, action, ip, id)
         try:
           self.connection()
           self.dbcon.execute(sql_command, val)

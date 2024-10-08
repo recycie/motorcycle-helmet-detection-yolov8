@@ -139,21 +139,40 @@
         let observer
         let monitorValue = ''
 
-        function fetchMonitor() {
+        function fetchMonitor(retries = 3) {
             $.ajax({
                 url: `${ENDPOINT}/api/v1/monitor`,
+                headers: {
+                    'x-api-key': API_KEY
+                },
                 success: function (response) {
-                    response.data.forEach(option => {
-                        const newOption = $('<option></option>')
-                            .attr('value', option[0])
-                            .text(option[1])
-                        $('#selectmonitor').append(newOption)
-                    })
+                    if (response && response.data && response.data.length > 0) {
+                        response.data.forEach(option => {
+                            const newOption = $('<option></option>')
+                                .attr('value', option[0])
+                                .text(option[1]);
+                            $('#selectmonitor').append(newOption);
+                        });
+                    } else {
+                        console.log('No data returned from the API');
+                        if (retries > 0) {
+                            console.log(`Retrying... (${3 - retries} retries left)`);
+                            fetchMonitor(retries - 1); // Retry if the request fails
+                        } else {
+                            Swal.fire('Error', 'Failed to fetch monitors', 'error');
+                        }
+                    }
                 },
                 error: function (error) {
-                    console.log(error.response)
+                    console.log('Error:', error.response);
+                    if (retries > 0) {
+                        console.log(`Retrying... (${3 - retries} retries left)`);
+                        fetchMonitor(retries - 1); // Retry if the request fails
+                    } else {
+                        Swal.fire('Error', 'Failed to fetch monitors', 'error');
+                    }
                 }
-            })
+            });
         }
 
         $('#selectmonitor').change(function () {
@@ -176,29 +195,49 @@
             fetchReports(datestart, dateend)
         })
 
-        function fetchReports(datestart = '', dateend = '') {
-            showSpinner()
+        function fetchReports(datestart = '', dateend = '', retries = 3) {
+            showSpinner();
             $.ajax({
                 url: `${ENDPOINT}/api/v1/data/detection/all?start=${datestart}&end=${dateend}&sort=desc&monitor_id=${monitorValue}`,
                 method: 'GET',
                 dataType: 'json',
+                headers: {
+                    'x-api-key': API_KEY
+                },
                 success: function (response) {
+                    hideSpinner();
                     if (response && response.data) {
-                        const data = formatData(response.data)
+                        const data = formatData(response.data);
                         if ($.fn.DataTable.isDataTable('#data-table')) {
-                            table.clear().rows.add(data).draw()
+                            table.clear().rows.add(data).draw();
                         } else {
-                            table = initializeDataTable(data)
+                            table = initializeDataTable(data);
                         }
-                        setupEventListeners(table)
+                        setupEventListeners(table);
+                    } else {
+                        console.log('No data returned from the API');
+                        if (retries > 0) {
+                            console.log(`Retrying... (${3 - retries} retries left)`);
+                            fetchReports(datestart, dateend, retries - 1); // Retry the request
+                        } else {
+                            hideSpinner();
+                            Swal.fire('Error', 'Failed to fetch reports after several attempts', 'error');
+                        }
                     }
                 },
                 error: function (error) {
-                    hideSpinner()
-                    console.error('Error:', error)
+                    console.error('Error:', error);
+                    if (retries > 0) {
+                        console.log(`Retrying... (${3 - retries} retries left)`);
+                        fetchReports(datestart, dateend, retries - 1); // Retry the request
+                    } else {
+                        hideSpinner();
+                        Swal.fire('Error', 'Failed to fetch reports after several attempts', 'error');
+                    }
                 }
-            })
+            });
         }
+
 
         function formatData(data) {
             return data.map((v, i) => {
@@ -303,6 +342,9 @@
             $.ajax({
                 url: `${ENDPOINT}/api/v1/data/detection/bbox?did=${boxesId}&monitor_id=${monitorValue}`,
                 dataType: 'json',
+                headers: {
+                    'x-api-key': API_KEY
+                },
                 success: function (response) {
                     const boxdata = response['data'][0]
                     const helmetbbox = boxdata.slice(1, 5)

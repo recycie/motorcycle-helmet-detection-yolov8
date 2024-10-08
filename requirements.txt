@@ -1,0 +1,12 @@
+ultralytics
+opencv-python
+imutils
+numpy
+streamlink
+Flask
+flask-cors
+configparser
+onnxruntime
+onnxruntime-gpu
+mysql.connector
+filterpy

@@ -1,10 +1,9 @@
 import math
-import time
 import cv2
 import numpy as np
 import onnxruntime
 
-from ops import rescale_boxes, xywh2xyxy, nms, draw_detections, sigmoid
+from .ops import rescale_boxes, xywh2xyxy, nms, draw_detections, sigmoid
 
 class YOLO_SEGMENT:
     def __init__(self, path):
@@ -18,7 +17,7 @@ class YOLO_SEGMENT:
         self.get_output_details()
 
     def inference(self, input_tensor):
-        start = time.perf_counter()
+        # start = time.perf_counter()
         outputs = self.session.run(self.output_names, {self.input_names[0]: input_tensor})
         # print(f"Inference time: {(time.perf_counter() - start)*1000:.2f} ms")
         return outputs

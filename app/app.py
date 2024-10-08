@@ -1,3 +1,5 @@
+import enum
+import hashlib
 from mysql_class import Database
 from flask import render_template, jsonify, Flask, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
@@ -5,9 +7,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 from urllib.parse import urlparse
-import enum
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-import hashlib
 
 DB_HOST = "localhost"
 DB_USERNAME = "root"
@@ -54,11 +54,13 @@ def urlParse(url):
     parsed_url = urlparse(url)
 
     protocol = parsed_url.scheme
-    host = parsed_url.netloc
+    if parsed_url.netloc == '': 
+        host = 'localhost' 
+    else: 
+        host =  parsed_url.netloc
+
     port = parsed_url.port
-
-    print(parsed_url, url)
-
+    
     if port is None:
         port = 80
 
@@ -129,7 +131,7 @@ def update_user():
         data = request.get_json()
 
         user = User.query.get_or_404(data['userId'])
-        if len(data.get('password')) != 0 and len(data.get('password')) >= 6:
+        if len(data.get('password')) != 0 and len(data.get('password')) >= 3:
             user.password = hash_password_sha256(data['password'])
         user.role = data.get('role', user.role)
         user.status = data.get('status', user.status)
@@ -156,7 +158,7 @@ def login():
                 return jsonify({'status': 'success', 'msg': 'Login successfully'})
 
         return jsonify({'status': 'error', 'msg': 'Username or Password Invalid.'})
-    return render_template("index.html", page='login', sources={}, serverselect={})
+    return render_template("index.html", page='login', sources={}, serverselect={}, session=SESSION)
 
 @app.route('/logout')
 @login_required
@@ -212,7 +214,7 @@ def index():
         page = 'deny'
     
     if current_user.username and serverselect:
-        SESSION[current_user.username] = urlParse(serverselect[3])
+        SESSION[current_user.username] = serverselect
     
     user_list = loadUserList(page)
 
@@ -235,7 +237,7 @@ def selectserver():
         result = DATABASE.select('SELECT * FROM source WHERE id = %s AND name = %s', (requestData['serverId'], requestData['serverName']))
         if len(result) != 0 :
             serverselect = result[0]
-            SESSION[current_user.username] = urlParse(serverselect[2])
+            SESSION[current_user.username] = serverselect
             return jsonify({
                 'status': 'success',
                 'msg': 'ok'
@@ -279,7 +281,7 @@ def deleteSource():
     }
     
     if request.is_json:
-        print(request.get_json()['id'])
+        # print(request.get_json()['id'])
         results = DATABASE.insert('DELETE FROM `source` WHERE id = %s', (request.get_json()['id'],))
         if results:
             data = {
